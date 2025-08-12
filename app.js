@@ -64,8 +64,8 @@ app.use('/api/auth/register', authLimiter);
 // Routes
 app.use('/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/get', (req, res) => {
-    return res.status(200).json({ message: "From backend server" })
+app.get('/api/get', (req, res) => {
+    return res.status(200).json({ message: "From backend server" });
 })
 // app.use('/api/tickets', ticketRoutes);
 
