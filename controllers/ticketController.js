@@ -92,6 +92,49 @@ export async function deleteTicket(req, res) {
     }
 }
 
+export async function dashboard(req, res) {
+    try {
+
+        const statusCounts = await Ticket.aggregate([
+            {
+                $group: {
+                    _id: "$status",
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+        console.log("🚀 ~ dashboard ~ statusCounts:", statusCounts)
+
+        const counts = {
+            totalTickets: 0,
+            open: 0,
+            inprogress: 0,
+            closed: 0,
+            reopen: 0
+        };
+
+        statusCounts.forEach(item => {
+            counts[item._id] = item.count;
+            counts.totalTickets += item.count;
+        });
+
+        const userTicketCount = await Ticket.distinct("createdBy");
+
+        res.status(200).json({
+            totalTickets: counts.totalTickets,
+            openTickets: counts.open,
+            inProgressTickets: counts.inprogress,
+            completedTickets: counts.closed,
+            reopenTickets: counts.reopen,
+            totalUserTicketCount: userTicketCount.length
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
 
 
 

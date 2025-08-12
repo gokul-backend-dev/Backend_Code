@@ -159,7 +159,7 @@ export async function crateUserAdmin(req, res) {
     try {
         const { email, password, firstName, lastName, role } = req.body;
 
-        if (!email || !password || !name) {
+        if (!email || !password || !firstName) {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
@@ -169,7 +169,7 @@ export async function crateUserAdmin(req, res) {
             return res.status(409).json({ message: 'User already exists' });
         }
 
-        const result = await User.insertOne({ email, password, name, providers: ['local'], role: 'admin' });
+        const result = await User.insertOne({ email, password, firstName, providers: ['local'], role: 'admin' });
 
         res.status(201).json({
             message: 'User created successfully',
@@ -178,4 +178,18 @@ export async function crateUserAdmin(req, res) {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+}
+
+export async function dropDwon(req, res) {
+    try {
+        const UserRecord = await User.find({ _id: { $ne: req.user._id } }, { firstName: 1, _id: 1 });
+        if (!UserRecord) {
+            return res.status(401).json({ message: 'user not found' });
+        }
+        res.status(200).json({ UserRecord });
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+
 }
