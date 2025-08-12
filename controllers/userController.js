@@ -5,9 +5,9 @@ import User from '../modules/user.js'
 
 export async function createUser(req, res) {
     try {
-        const { email, password, name, role } = req.body;
+        const { email, password, firstName, lastName, role, phone } = req.body;
 
-        if (!email || !password || !name) {
+        if (!email || !password || !firstName || !role) {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
@@ -17,7 +17,15 @@ export async function createUser(req, res) {
             return res.status(409).json({ message: 'User already exists' });
         }
 
-        const result = await User.insertOne({ email, password, name, providers: ['local'], role: role || 'user' });
+        const result = await User.create({
+            email,
+            password,
+            firstName,
+            lastName,
+            phone,
+            providers: ['local'],
+            role: role || 'user'
+        });
 
         res.status(201).json({
             message: 'User created successfully',
@@ -32,7 +40,7 @@ export async function createUser(req, res) {
 export async function updateUser(req, res) {
     try {
         const userId = req.params.id;
-        const { email, name, role } = req.body;
+        const { email, password, firstName, lastName, role, phone } = req.body;
 
         if (!userId) {
             return res.status(400).json({ message: 'User ID is required' });
@@ -40,8 +48,11 @@ export async function updateUser(req, res) {
 
         const updateFields = {};
         if (email) updateFields.email = email;
-        if (name) updateFields.name = name;
+        if (firstName) updateFields.firstName = firstName;
+        if (lastName) updateFields.lastName = lastName;
         if (role) updateFields.role = role;
+        if (password) updateFields.password = password;
+        if (phone) updateFields.phone = phone
 
         if (Object.keys(updateFields).length === 0) {
             return res.status(400).json({ message: 'No fields provided for update' });
@@ -57,14 +68,7 @@ export async function updateUser(req, res) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        res.status(200).json({
-            message: 'User updated successfully',
-            user: {
-                id: result._id,
-                email: result.email,
-                name: result.name
-            }
-        });
+        res.status(200).json({ message: 'User updated successfully', });
 
     } catch (error) {
 
@@ -153,7 +157,7 @@ export async function deleteUser(req, res) {
 //Admin
 export async function crateUserAdmin(req, res) {
     try {
-        const { email, password, name, role } = req.body;
+        const { email, password, firstName, lastName, role } = req.body;
 
         if (!email || !password || !name) {
             return res.status(400).json({ message: 'All fields are required' });

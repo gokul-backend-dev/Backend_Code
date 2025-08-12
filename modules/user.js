@@ -15,9 +15,17 @@ const UserSchema = new mongoose.Schema({
             return !this.googleId && !this.githubId;
         }
     },
-    name: {
+    firstName: {
         type: String,
         required: true,
+        trim: true
+    },
+    lastName: {
+        type: String,
+        trim: true
+    },
+    phone: {
+        type: String,
         trim: true
     },
     role: {
