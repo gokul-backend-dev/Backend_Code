@@ -107,7 +107,7 @@ export async function login(req, res) {
                 email: UserRecord.email,
                 avatar: UserRecord.avatar,
                 providers: UserRecord.providers,
-                role: role || 'Admin'
+                role: role || 'admin'
             },
         });
 
@@ -164,7 +164,7 @@ export async function crateUserAdmin(req, res) {
             return res.status(409).json({ message: 'User already exists' });
         }
 
-        const result = await User.insertOne({ email, password, name, providers: ['local'], role: 'SuperAdmin' });
+        const result = await User.insertOne({ email, password, name, providers: ['local'], role: 'admin' });
 
         res.status(201).json({
             message: 'User created successfully',

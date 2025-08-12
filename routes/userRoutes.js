@@ -1,7 +1,6 @@
 import express from 'express';
-import { crateUserAdmin, createUser, getUser, githubCallback, googleCallback, login, updateUser } from '../controllers/userController.js';
+import { crateUserAdmin, createUser, getUser, login, updateUser } from '../controllers/userController.js';
 import { authenticateToken } from '../middlewares/jwtAuth.js'; // ✅ Must be a function
-import passport from 'passport';
 
 const router = express.Router();
 
