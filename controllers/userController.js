@@ -107,12 +107,13 @@ export async function login(req, res) {
                 email: UserRecord.email,
                 avatar: UserRecord.avatar,
                 providers: UserRecord.providers,
-                role: role || 'admin'
+                role: UserRecord.role || 'admin'
             },
         });
 
     } catch (error) {
-        return false
+        console.log("🚀 ~ login ~ error:", error)
+        res.status(500).json({ error: error.message });
     }
 }
 
@@ -126,7 +127,7 @@ export async function getUser(req, res) {
         res.status(200).json({ message: 'User get successfully', UserRecord });
 
     } catch (error) {
-
+        res.status(500).json({ error: error.message });
     }
 
 }
@@ -171,6 +172,6 @@ export async function crateUserAdmin(req, res) {
             userId: result._id
         });
     } catch (error) {
-
+        res.status(500).json({ error: error.message });
     }
 }
