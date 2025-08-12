@@ -20,6 +20,10 @@ const UserSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    role: {
+        type: String,
+        default: null
+    },
     avatar: {
         type: String,
         default: null
@@ -33,6 +37,7 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+
     providers: [{
         type: String,
         enum: ['local', 'google', 'github']

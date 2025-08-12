@@ -1,4 +1,3 @@
-// wherever you're using it
 import { token } from 'morgan';
 import { generateTokens } from '../middlewares/jwtAuth.js';
 import User from '../modules/user.js'

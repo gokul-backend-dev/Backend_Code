@@ -24,16 +24,19 @@ export const authenticateToken = async (req, res, next) => {
             return res.status(401).json({ message: 'Access token required' });
         }
 
+        console.log("🚀 ~ authenticateToken ~ process.env.JWT_SECRET:", process.env.JWT_SECRET)
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findById(decoded.id).select('-password -refreshTokens');
+        const user = await User.findById(decoded.id).select('-password');
+        console.log("🚀 ~ authenticateToken ~ user:", user)
 
-        if (!user || !user.isActive) {
+        if (!user) {
             return res.status(401).json({ message: 'Invalid or expired token' });
         }
 
         req.user = user;
         next();
     } catch (error) {
+        console.log("🚀 ~ authenticateToken ~ error:", error)
         if (error.name === 'JsonWebTokenError') {
             return res.status(401).json({ message: 'Invalid token' });
         } else if (error.name === 'TokenExpiredError') {

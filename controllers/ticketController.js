@@ -1,10 +1,10 @@
-import Ticket from '../models/Ticket.js';
+import Ticket from '../modules/tickets.js';
 
 export async function createTicket(req, res) {
     try {
-        const { title, description } = req.body;
+        const { title, description, assignedTo, priority, status } = req.body;
 
-        if (!title || !description) {
+        if (!title || !description || !assignedTo || !priority || !status) {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
@@ -15,7 +15,7 @@ export async function createTicket(req, res) {
             return res.status(400).json({ message: 'Ticket with this title already exists' });
         }
 
-        const newTicket = new Ticket({ title, description, createdBy });
+        const newTicket = new Ticket({ title, description, assignedTo, priority, status, createdBy });
 
         await newTicket.save();
 
@@ -28,7 +28,7 @@ export async function createTicket(req, res) {
 
 export async function getAllTickets(req, res) {
     try {
-        const tickets = await Ticket.find().populate('createdBy', 'name email');
+        const tickets = await Ticket.find().populate([{ path: "assignedTo", select: "name" }, { path: "createdBy", select: "name" }]);
         res.status(200).json({ tickets });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -38,11 +38,11 @@ export async function getAllTickets(req, res) {
 export async function updateTicket(req, res) {
     try {
         const { id } = req.params;
-        const { title, description } = req.body;
+        const { title, description, assignedTo, priority, status } = req.body;
 
         const updatedTicket = await Ticket.findByIdAndUpdate(
             id,
-            { title, description },
+            { title, description, assignedTo, priority, status },
             { new: true }
         );
 
@@ -57,9 +57,28 @@ export async function updateTicket(req, res) {
     }
 }
 
+export async function viewTicket(req, res) {
+    try {
+        const id = req.params.id;
+        console.log("🚀 ~ viewTicket ~ req.params:", req.params)
+
+        const ticketRecord = await Ticket.findById(id)
+        console.log("🚀 ~ viewTicket ~ ticketRecord:", ticketRecord)
+
+        if (!ticketRecord) {
+            return res.status(404).json({ message: 'Ticket not found' });
+        }
+
+        res.status(200).json({ message: 'Ticket get successfully', ticket: ticketRecord });
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
 export async function deleteTicket(req, res) {
     try {
-        const { id } = req.params;
+        const id = req.params.id;
 
         const deleted = await Ticket.findByIdAndDelete(id);
         if (!deleted) {
@@ -72,3 +91,7 @@ export async function deleteTicket(req, res) {
         res.status(500).json({ error: error.message });
     }
 }
+
+
+
+

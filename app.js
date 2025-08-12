@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import ticketsRoutes from './routes/ticketRoutes.js'
 import { connectDB } from './config/database.js';
 import session from 'express-session';
 import passport from 'passport';
@@ -17,7 +18,7 @@ const PORT = process.env.PORT || 3001
 // Connect to database
 connectDB();
 
-
+app.set('trust proxy', 1);
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -61,13 +62,17 @@ app.use(passport.session());
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 
-// Routes
-app.use('/auth', authRoutes);
-app.use('/api/users', userRoutes);
+
 app.get('/api/get', (req, res) => {
     return res.status(200).json({ message: "From backend server" });
 })
-// app.use('/api/tickets', ticketRoutes);
+
+// Routes
+app.use('/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/tickets', ticketsRoutes);
+
+
 
 
 app.listen(PORT, '0.0.0.0', () => {
