@@ -1,14 +1,11 @@
-import { token } from 'morgan';
 import { generateTokens } from '../middlewares/jwtAuth.js';
 import User from '../modules/user.js'
-import passport from "passport";
 
-// require('../modules/user.js')
 
 
 export async function createUser(req, res) {
     try {
-        const { email, password, name } = req.body;
+        const { email, password, name, role } = req.body;
 
         if (!email || !password || !name) {
             return res.status(400).json({ message: 'All fields are required' });
@@ -20,7 +17,7 @@ export async function createUser(req, res) {
             return res.status(409).json({ message: 'User already exists' });
         }
 
-        const result = await User.insertOne({ email, password, name, providers: ['local'] });
+        const result = await User.insertOne({ email, password, name, providers: ['local'], role: role || 'user' });
 
         res.status(201).json({
             message: 'User created successfully',
@@ -29,6 +26,48 @@ export async function createUser(req, res) {
     } catch (error) {
         console.error('Get profile error:', error);
         res.status(500).json({ message: 'Server error' });
+    }
+}
+
+export async function updateUser(req, res) {
+    try {
+        const userId = req.params.id;
+        const { email, name, role } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
+        }
+
+        const updateFields = {};
+        if (email) updateFields.email = email;
+        if (name) updateFields.name = name;
+        if (role) updateFields.role = role;
+
+        if (Object.keys(updateFields).length === 0) {
+            return res.status(400).json({ message: 'No fields provided for update' });
+        }
+
+        const result = await User.findByIdAndUpdate(
+            userId,
+            { $set: updateFields },
+            { new: true }
+        );
+
+        if (!result) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json({
+            message: 'User updated successfully',
+            user: {
+                id: result._id,
+                email: result.email,
+                name: result.name
+            }
+        });
+
+    } catch (error) {
+
     }
 }
 
@@ -67,32 +106,13 @@ export async function login(req, res) {
                 name: UserRecord.name,
                 email: UserRecord.email,
                 avatar: UserRecord.avatar,
-                providers: UserRecord.providers
+                providers: UserRecord.providers,
+                role: role || 'Admin'
             },
         });
 
     } catch (error) {
         return false
-    }
-}
-
-export async function googleCallback(req, res) {
-    try {
-        const { accessToken } = generateTokens(req.user._id);
-        res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${accessToken}`);
-    } catch (error) {
-        console.error('Google callback error:', error);
-        res.redirect(`${process.env.CLIENT_URL}/login?error=auth_callback_failed`);
-    }
-}
-
-export async function githubCallback(req, res) {
-    try {
-        const { accessToken } = generateTokens(req.user._id);
-        res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${accessToken}`);
-    } catch (error) {
-        console.error('GitHub callback error:', error);
-        res.redirect(`${process.env.CLIENT_URL}/login?error=auth_callback_failed`);
     }
 }
 
@@ -103,7 +123,7 @@ export async function getUser(req, res) {
         if (!UserRecord) {
             return res.status(401).json({ message: 'user not found' });
         }
-        res.status(200).json({ UserRecord });
+        res.status(200).json({ message: 'User get successfully', UserRecord });
 
     } catch (error) {
 
@@ -125,5 +145,32 @@ export async function deleteUser(req, res) {
 
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+}
+
+
+//Admin
+export async function crateUserAdmin(req, res) {
+    try {
+        const { email, password, name, role } = req.body;
+
+        if (!email || !password || !name) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
+        const existingUser = await User.findOne({ email });
+
+        if (existingUser) {
+            return res.status(409).json({ message: 'User already exists' });
+        }
+
+        const result = await User.insertOne({ email, password, name, providers: ['local'], role: 'SuperAdmin' });
+
+        res.status(201).json({
+            message: 'User created successfully',
+            userId: result._id
+        });
+    } catch (error) {
+
     }
 }
