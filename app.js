@@ -10,7 +10,7 @@ import authRoutes from './routes/authRoutes.js';
 import ticketsRoutes from './routes/ticketRoutes.js'
 import { connectDB } from './config/database.js';
 import passport from 'passport';
-
+import session from 'express-session';
 const app = express();
 const PORT = process.env.PORT || 3001
 
@@ -34,6 +34,15 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
+
+
+
+app.use(session({
+    secret: 'your-secret-key',  // change to a strong secret
+    resave: false,
+    saveUninitialized: false,
+    // cookie: { secure: true } // only if using HTTPS
+}));
 
 // Passport middleware
 app.use(passport.initialize());
