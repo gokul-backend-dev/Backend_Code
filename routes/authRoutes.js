@@ -7,7 +7,7 @@ console.log("🚀 ~ router:", router)
 
 
 // Route to initiate Google login
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/google', googleAuth);
 
 
 // Google

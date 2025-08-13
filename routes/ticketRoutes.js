@@ -1,5 +1,5 @@
 import express from 'express';
-import { createTicket, getAllTickets, updateTicket, deleteTicket, viewTicket, dashboard } from '../controllers/ticketController.js';
+import { createTicket, getAllTickets, updateTicket, deleteTicket, dashboard } from '../controllers/ticketController.js';
 import { authenticateToken } from '../middlewares/jwtAuth.js';
 
 const router = express.Router();
@@ -9,9 +9,6 @@ router.post('/createTicket', authenticateToken, createTicket);
 
 // Get all tickets
 router.get('/getAll', authenticateToken, getAllTickets);
-
-// Get all tickets
-router.get('/viewTicket/:id', authenticateToken, viewTicket);
 
 // Update a ticket by ID
 router.put('/update/:id', authenticateToken, updateTicket);

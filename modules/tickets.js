@@ -7,6 +7,8 @@ const Tickets = new mongoose.Schema({
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     priority: String,
     status: { type: String, enum: ['open', 'inprogress', 'completed', 'reopen'], default: 'open' }
+}, {
+    timestamps: true
 });
 
 

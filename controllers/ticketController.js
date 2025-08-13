@@ -30,9 +30,9 @@ export async function getAllTickets(req, res) {
     try {
         let tickets;
         if (req.user.role == 'admin') {
-            tickets = await Ticket.find().populate([{ path: "assignedTo", select: "name" }, { path: "createdBy", select: "name" }]);
+            tickets = await Ticket.find().populate([{ path: "assignedTo", select: "firstName" }, { path: "createdBy", select: "firstName" }]);
         } else {
-            tickets = await Ticket.find().populate([{ path: "assignedTo", select: "name" }, { path: "createdBy", select: "name" }]).where('assignedTo').equals(req.user._id);
+            tickets = await Ticket.find().populate([{ path: "assignedTo", select: "firstName" }, { path: "createdBy", select: "firstName" }]).where('assignedTo').equals(req.user._id);
         }
 
         res.status(200).json({ tickets });
@@ -57,25 +57,6 @@ export async function updateTicket(req, res) {
         }
 
         res.status(200).json({ message: 'Ticket updated', ticket: updatedTicket });
-
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-}
-
-export async function viewTicket(req, res) {
-    try {
-        const id = req.params.id;
-        console.log("🚀 ~ viewTicket ~ req.params:", req.params)
-
-        const ticketRecord = await Ticket.findById(id)
-        console.log("🚀 ~ viewTicket ~ ticketRecord:", ticketRecord)
-
-        if (!ticketRecord) {
-            return res.status(404).json({ message: 'Ticket not found' });
-        }
-
-        res.status(200).json({ message: 'Ticket get successfully', ticket: ticketRecord });
 
     } catch (error) {
         res.status(500).json({ error: error.message });
