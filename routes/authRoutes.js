@@ -7,11 +7,12 @@ console.log("🚀 ~ router:", router)
 
 
 // Route to initiate Google login
-router.get('/google', googleAuth);
-
+router.get('/google', (req, res, next) => {
+    console.log('🚀 Hitting /auth/google route');
+    next();
+}, googleAuth);
 
 // Google
-// router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 router.get('/google/callback', googleAuthCallback, googleAuthSuccess);
 
 export default router;

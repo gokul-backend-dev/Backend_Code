@@ -1,6 +1,6 @@
 import { generateTokens } from '../middlewares/jwtAuth.js';
 import User from '../modules/user.js'
-
+import bcrypt from 'bcrypt'
 
 
 export async function createUser(req, res) {
