@@ -28,7 +28,13 @@ export async function createTicket(req, res) {
 
 export async function getAllTickets(req, res) {
     try {
-        const tickets = await Ticket.find().populate([{ path: "assignedTo", select: "name" }, { path: "createdBy", select: "name" }]);
+        let tickets;
+        if (req.user.role == 'admin') {
+            tickets = await Ticket.find().populate([{ path: "assignedTo", select: "name" }, { path: "createdBy", select: "name" }]);
+        } else {
+            tickets = await Ticket.find().populate([{ path: "assignedTo", select: "name" }, { path: "createdBy", select: "name" }]).where('assignedTo').equals(req.user._id);
+        }
+
         res.status(200).json({ tickets });
     } catch (error) {
         res.status(500).json({ error: error.message });

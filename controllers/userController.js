@@ -116,7 +116,6 @@ export async function login(req, res) {
         });
 
     } catch (error) {
-        console.log("🚀 ~ login ~ error:", error)
         res.status(500).json({ error: error.message });
     }
 }
@@ -182,7 +181,12 @@ export async function crateUserAdmin(req, res) {
 
 export async function dropDown(req, res) {
     try {
-        const UserRecord = await User.find({ _id: { $ne: req.user._id, role: 'admin' } }, { firstName: 1, _id: 1 });
+        const UserRecord = await User.find(
+            {
+                _id: { $ne: req.user._id },
+                role: 'admin'
+            },
+            { firstName: 1, _id: 1 });
         if (!UserRecord) {
             return res.status(401).json({ message: 'user not found' });
         }
@@ -191,22 +195,5 @@ export async function dropDown(req, res) {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-
-}
-
-export async function getAllUser(req, res) {
-    try {
-
-        const UserRecord = await User.find({ _id: { $ne: req.user._id } }, { firstName: 1, _id: 1 });
-
-        if (!UserRecord) {
-            return res.status(401).json({ message: 'user not found' });
-        }
-        res.status(200).json({ message: 'Users get successfully', UserRecord });
-
-    } catch (error) {
-
-    }
-
 
 }
