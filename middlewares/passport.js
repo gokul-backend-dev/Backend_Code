@@ -10,7 +10,7 @@ console.log("🚀 ~ process.env.CALLBACK_URL:", process.env.CALLBACK_URL)
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: `${process.env.CALLBACK_URL}/auth/google/callback`,
+    callbackURL: `https://gh7rm5l3-3004.inc1.devtunnels.ms/auth/google/callback`,
     passReqToCallback: true
 }, async (req, accessToken, refreshToken, profile, done) => {
 
@@ -22,7 +22,8 @@ passport.use(new GoogleStrategy({
             user = await new User({
                 googleId: profile.id,
                 email: profile.emails[0].value,
-                firstName: profile.displayName,
+                firstName: profile.name.givenName,
+                lastName: profile.name.familyName,
                 avatar: profile.photos[0].value,
                 role: 'user',
                 providers: ['google'],
@@ -43,5 +44,6 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id, done) => {
     done(null, id);
 });
+
 
 export default passport;

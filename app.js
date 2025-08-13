@@ -25,24 +25,22 @@ app.use(express.json());
 app.use(morgan('dev'));
 app.use(cookieParser());
 
-// // Rate limiting
-// const limiter = rateLimit({
-//     windowMs: 15 * 60 * 1000, // 15 minutes
-//     max: 100, // limit each IP to 100 requests per windowMs
-//     message: 'Too many requests from this IP, please try again later.',
-//     standardHeaders: true,
-//     legacyHeaders: false,
-// });
-// app.use('/api/', limiter);
+// Rate limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: 'Too many requests from this IP, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+});
 
-
-
+app.use('/api/', limiter);
 
 app.use(session({
     secret: 'your-secret-key',  // change to a strong secret
     resave: false,
     saveUninitialized: false,
-    // cookie: { secure: true } // only if using HTTPS
+    cookie: { secure: true } // only if using HTTPS
 }));
 
 // Passport middleware

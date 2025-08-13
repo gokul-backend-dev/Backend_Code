@@ -30,9 +30,9 @@ export async function getAllTickets(req, res) {
     try {
         let tickets;
         if (req.user.role == 'admin') {
-            tickets = await Ticket.find().populate([{ path: "assignedTo", select: "firstName" }, { path: "createdBy", select: "firstName" }]);
+            tickets = await Ticket.find().populate([{ path: "assignedTo", select: "firstName" }, { path: "createdBy", select: "firstName" }]).sort({ _id: -1 });
         } else {
-            tickets = await Ticket.find().populate([{ path: "assignedTo", select: "firstName" }, { path: "createdBy", select: "firstName" }]).where('assignedTo').equals(req.user._id);
+            tickets = await Ticket.find().populate([{ path: "assignedTo", select: "firstName" }, { path: "createdBy", select: "firstName" }]).where('assignedTo').equals(req.user._id).sort({ _id: -1 });
         }
 
         res.status(200).json({ tickets });
@@ -120,6 +120,7 @@ export async function dashboard(req, res) {
             reopen: 0
         };
 
+        console.log("🚀 ~ dashboard ~ statusCounts:", statusCounts)
         if (statusCounts) {
             statusCounts.forEach(item => {
                 counts[item._id] = item.count;

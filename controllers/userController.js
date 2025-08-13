@@ -185,7 +185,7 @@ export async function getAllUsers(req, res) {
             {
                 _id: { $ne: req.user._id },
             },
-        );
+        ).sort({ _id: -1 });
         if (!UserRecord) {
             return res.status(401).json({ message: 'user not found' });
         }
