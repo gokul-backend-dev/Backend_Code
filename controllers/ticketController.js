@@ -82,21 +82,42 @@ export async function deleteTicket(req, res) {
 export async function dashboard(req, res) {
     try {
 
-        const statusCounts = await Ticket.aggregate([
-            {
-                $group: {
-                    _id: "$status",
-                    count: { $sum: 1 }
+
+        let statusCounts = null;
+        if (req.user.role == 'admin') {
+
+            statusCounts = await Ticket.aggregate([
+                {
+                    $group: {
+                        _id: "$status",
+                        count: { $sum: 1 }
+                    }
                 }
-            }
-        ]);
+            ]);
+        }
+        else {
+            await Ticket.aggregate([
+                {
+                    $match: {
+                        assignedTo: req.user._id
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$status",
+                        count: { $sum: 1 }
+                    }
+                }
+            ]);
+        }
         console.log("🚀 ~ dashboard ~ statusCounts:", statusCounts)
 
         const counts = {
             totalTickets: 0,
             open: 0,
-            inprogress: 0,
-            closed: 0,
+            "in-progress": 0,
+            completed: 0,
+            high: 0,
             reopen: 0
         };
 
@@ -104,16 +125,19 @@ export async function dashboard(req, res) {
             counts[item._id] = item.count;
             counts.totalTickets += item.count;
         });
+        console.log("🚀 ~ dashboard ~ statusCounts:", statusCounts)
 
-        const userTicketCount = await Ticket.distinct("createdBy");
+        const userTicketCount = await Ticket.distinct("assignedTo");
 
         res.status(200).json({
             totalTickets: counts.totalTickets,
             openTickets: counts.open,
-            inProgressTickets: counts.inprogress,
-            completedTickets: counts.closed,
+            inProgressTickets: counts["in-progress"],
+            completedTickets: counts.completed,
             reopenTickets: counts.reopen,
-            totalUserTicketCount: userTicketCount.length
+            highPriorityTickets: counts.high,
+            totalUserTicketCount: userTicketCount.length,
+            completionRate: Number(((counts.completed / counts.totalTickets) * 100).toFixed(2)),
         });
 
     } catch (err) {
@@ -121,6 +145,7 @@ export async function dashboard(req, res) {
         res.status(500).json({ error: 'Server error' });
     }
 };
+
 
 
 

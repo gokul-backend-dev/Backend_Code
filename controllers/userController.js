@@ -7,7 +7,7 @@ export async function createUser(req, res) {
     try {
         const { email, password, firstName, lastName, role, phone } = req.body;
 
-        if (!email || !password || !firstName || !role) {
+        if (!email || !password || !firstName) {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
@@ -20,7 +20,7 @@ export async function createUser(req, res) {
         let newPassword = await bcrypt.hash(password, salt);
         const result = await User.create({
             email,
-            newPassword,
+            password: newPassword,
             firstName,
             lastName,
             phone,
@@ -179,14 +179,13 @@ export async function crateUserAdmin(req, res) {
     }
 }
 
-export async function dropDown(req, res) {
+export async function getAllUsers(req, res) {
     try {
         const UserRecord = await User.find(
             {
                 _id: { $ne: req.user._id },
-                role: 'admin'
             },
-            { firstName: 1, _id: 1 });
+        );
         if (!UserRecord) {
             return res.status(401).json({ message: 'user not found' });
         }
