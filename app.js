@@ -9,7 +9,6 @@ import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import ticketsRoutes from './routes/ticketRoutes.js'
 import { connectDB } from './config/database.js';
-import session from 'express-session';
 import passport from 'passport';
 
 const app = express();
@@ -35,40 +34,14 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// Stricter rate limiting for auth endpoints
-const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 10, // limit each IP to 10 requests per windowMs for auth
-    message: 'Too many authentication attempts, please try again later.',
-});
-
-// Session configuration
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'fallback-secret',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: process.env.NODE_ENV === 'production',
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    }
-}));
 
 // Passport middleware
 app.use(passport.initialize());
 app.use(passport.session());
 
 
-app.use('/api/auth/login', authLimiter);
-app.use('/api/auth/register', authLimiter);
-
-
-app.get('/api/get', (req, res) => {
-    return res.status(200).json({ message: "From backend server" });
-})
-
 // Routes
-app.use('/auth', authRoutes);
+app.use('/auth1', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/tickets', ticketsRoutes);
 

@@ -16,10 +16,11 @@ export async function createUser(req, res) {
         if (existingUser) {
             return res.status(409).json({ message: 'User already exists' });
         }
-
+        const salt = await bcrypt.genSalt(10);
+        let newPassword = await bcrypt.hash(password, salt);
         const result = await User.create({
             email,
-            password,
+            newPassword,
             firstName,
             lastName,
             phone,
@@ -51,7 +52,6 @@ export async function updateUser(req, res) {
         if (firstName) updateFields.firstName = firstName;
         if (lastName) updateFields.lastName = lastName;
         if (role) updateFields.role = role;
-        if (password) updateFields.password = password;
         if (phone) updateFields.phone = phone
 
         if (Object.keys(updateFields).length === 0) {
@@ -180,9 +180,9 @@ export async function crateUserAdmin(req, res) {
     }
 }
 
-export async function dropDwon(req, res) {
+export async function dropDown(req, res) {
     try {
-        const UserRecord = await User.find({ _id: { $ne: req.user._id } }, { firstName: 1, _id: 1 });
+        const UserRecord = await User.find({ _id: { $ne: req.user._id, role: 'admin' } }, { firstName: 1, _id: 1 });
         if (!UserRecord) {
             return res.status(401).json({ message: 'user not found' });
         }
@@ -191,5 +191,22 @@ export async function dropDwon(req, res) {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+
+}
+
+export async function getAllUser(req, res) {
+    try {
+
+        const UserRecord = await User.find({ _id: { $ne: req.user._id } }, { firstName: 1, _id: 1 });
+
+        if (!UserRecord) {
+            return res.status(401).json({ message: 'user not found' });
+        }
+        res.status(200).json({ message: 'Users get successfully', UserRecord });
+
+    } catch (error) {
+
+    }
+
 
 }

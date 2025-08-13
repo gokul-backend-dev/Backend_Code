@@ -1,57 +1,38 @@
 import passport from 'passport';
-import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { Strategy as GitHubStrategy } from 'passport-github';
+import { GoogleStrategy } from 'passport-google-oauth20';
 import User from '../modules/user';
 
+console.log("🚀 ~ process.env.GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID)
+console.log("🚀 ~ process.env.GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET)
+console.log("🚀 ~ process.env.CALLBACK_URL:", process.env.CALLBACK_URL)
 passport.use(new GoogleStrategy({
-    clientID: 'YOUR_GITHUB_CLIENT_ID',
-    clientSecret: 'YOUR_GITHUB_CLIENT_SECRET',
-    callbackURL: 'http://localhost:3000/auth/google/callback',
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: process.env.CALLBACK_URL || 'http://localhost:3004/auth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
+    console.log("🚀 ~ accessToken:", accessToken)
     console.log("🚀 ~ profile:", profile)
-    const newUser = {
-        googleId: profile.id,
-        name: profile.name?.givenName,
-        email: profile.emails?.[0]?.value,
-        image: profile.photos?.[0]?.value,
-        providers: ['google'],
-        isVerified: true
-    };
-
     try {
+
         let user = await User.findOne({ googleId: profile.id });
-
-        if (!user) {
-            user = await User.create(newUser);
+        if (user) {
+            user = new User({
+                googleId: profile.id,
+                email: profile.emails[0].value,
+                firstName: profile.displayName,
+                avatar: profile.photos[0].value,
+                providers: ['google'],
+                isVerified: true
+            }).save()
         }
-
-        const accessToken = await generateTokens(UserRecord._id);
-        user.lastLogin = new Date();
-        await UserRecord.save();
-        res.status(200).json({
-            message: 'Login successful',
-            token: accessToken,
-            user: {
-                id: UserRecord._id,
-                name: UserRecord.name,
-                email: UserRecord.email,
-                avatar: UserRecord.avatar,
-                providers: UserRecord.providers
-            },
-        });
+        return done(null, user);
     } catch (err) {
-        done(err, null);
+        console.log("🚀 ~ err:", err)
+        return done(err, null);
     }
 }));
 
-passport.use(new GitHubStrategy({
-    clientID: 'YOUR_GITHUB_CLIENT_ID',
-    clientSecret: 'YOUR_GITHUB_CLIENT_SECRET',
-    callbackURL: 'http://localhost:3000/auth/github/callback',
-}, (accessToken, refreshToken, profile, done) => {
-    // DB logic here
-    done(null, profile);
-}));
+
 
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((obj, done) => done(null, obj));
