@@ -110,34 +110,34 @@ export async function dashboard(req, res) {
                 }
             ]);
         }
-        console.log("🚀 ~ dashboard ~ statusCounts:", statusCounts)
 
         const counts = {
             totalTickets: 0,
             open: 0,
-            "in-progress": 0,
+            inprogress: 0,
             completed: 0,
             high: 0,
             reopen: 0
         };
 
-        statusCounts.forEach(item => {
-            counts[item._id] = item.count;
-            counts.totalTickets += item.count;
-        });
-        console.log("🚀 ~ dashboard ~ statusCounts:", statusCounts)
+        if (statusCounts) {
+            statusCounts.forEach(item => {
+                counts[item._id] = item.count;
+                counts.totalTickets += item.count;
+            });
+        }
 
-        const userTicketCount = await Ticket.distinct("assignedTo");
+        const userTicketCount = await Ticket.countDocuments({ assignedTo: req.user._id });
 
         res.status(200).json({
             totalTickets: counts.totalTickets,
             openTickets: counts.open,
-            inProgressTickets: counts["in-progress"],
+            inProgressTickets: counts.inprogress,
             completedTickets: counts.completed,
             reopenTickets: counts.reopen,
             highPriorityTickets: counts.high,
-            totalUserTicketCount: userTicketCount.length,
-            completionRate: Number(((counts.completed / counts.totalTickets) * 100).toFixed(2)),
+            totalUserTicketCount: userTicketCount.length || 0,
+            completionRate: Number(((counts.completed / counts.totalTickets) * 100).toFixed(2)) || 0,
         });
 
     } catch (err) {
